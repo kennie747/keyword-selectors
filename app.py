@@ -15,8 +15,8 @@ def generate_text(prompt):
         model="gpt-3.5-turbo",  # "gpt-4", #Use the GPT-3.5 Turbo model
         messages=[
             {"role": "system", "content": "You are a professional tech blogging assistant."},
-            {"role": "user", "content": prompt},
-            {"role": "user", "content": "Generate a list of 10 HIGHLY RELEVANT Key-phrases (BETWEEN 2 TO 4 words long) for the previous post, sort the list in descending order of relevance and label it *Keywords*, and make it comma separated with NO nunbering"}
+            {"role": "user", "content": prompt}
+            #{"role": "user", "content": "Generate a list of 10 HIGHLY RELEVANT Key-phrases (BETWEEN 2 TO 4 words long) for the previous post, sort the list in descending order of relevance and label it *Keywords*, and make it comma separated with NO nunbering"}
         ]
     )
 
