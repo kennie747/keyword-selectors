@@ -38,4 +38,4 @@ def api_generate_text():
     return jsonify({"generated_text": generated_text})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
