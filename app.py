@@ -9,35 +9,38 @@ api_key = os.environ.get("ENV_VARIABLE_NAME")
 
 # Function to generate text using the GPT-3.5 Turbo engine
 def generate_text(prompt, context, gptmodel):
+    if api_key is None:
+        return jsonify({"error": "OpenAI API key not provided"}), 500
+
     openai.api_key = api_key
 
-    response = openai.ChatCompletion.create(
-        model=gptmodel, ### NEW #### "gpt-3.5-turbo",  # "gpt-4", #Use the GPT-3.5 Turbo model
-        messages=[
-            {"role": "system", "content": context}, ### context NEW, initially "You are a professional tech blogging assistant."
-            {"role": "user", "content": prompt}
-            #{"role": "user", "content": "Generate a list of 10 HIGHLY RELEVANT Key-phrases (BETWEEN 2 TO 4 words long) for the previous post, sort the list in descending order of relevance and label it *Keywords*, and make it comma separated with NO nunbering"}
-        ]
-    )
+    try:
+        response = openai.ChatCompletion.create(
+            model=gptmodel, # "gpt-3.5-turbo",  # "gpt-4", #Use the GPT-3.5 Turbo model
+            messages=[
+                {"role": "system", "content": context}, # e.g. context "You are a professional tech blogging assistant."
+                {"role": "user", "content": prompt} # e.g. propmt "Generate a 160 word article on theory of relativity."
+            ]
+        )
 
-    generated_text = response.choices[0].message["content"].strip()
-    return generated_text
-
+        generated_text = response.choices[0].message["content"].strip()
+        return generated_text
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
 @app.route('/generate_text', methods=['POST'])
 def api_generate_text():
     data = request.get_json()
     prompt = data.get('prompt')
-    context = data.get('context') ### NEW ###
-    gptmodel = data.get('gptmodel') ### NEW ###
+    context = data.get('context')
+    gptmodel = data.get('gptmodel')
 
-    if not prompt or not context: ###  or not context NEW ###
-        return jsonify({"error": "Missing 'prompt' or 'context' or 'gptmodel' parameter"}), 400 ### or 'context' or gptmodel NEW ###
+    if not prompt or not context or not gptmodel:
+        return jsonify({"error": "Missing 'prompt', 'context' or 'gptmodel' parameter"}), 400 ### or 'context' or gptmodel NEW ###
 
-    prompt = f"\"{prompt}\"." # Formatted to make it easy to insert any preceeding text as shown the comment below
-    # f"Please rewrite the following tech blog post in a unique and original way while preserving all the information and key points; if there are images in the original post, retain them and add appropriate attribution; conclude with a list of 10 HIGHLY RELEVANT Key-phrases (BETWEEN 2 TO 4 words long) for the post, sorted in descending order of relevance and label the list *Keywords*, comma separated with NO nunbering: \"{text}\"."
-    context = f"\"{context}\"." ### NEW ###
-    gptmodel = f"\"{gptmodel}\"." ### NEW ###
-    generated_text = generate_text(prompt, context, gptmodel) ### ,context, gptmodel NEW ###
+    prompt = f"\"{prompt}\"." # Formatted to make it easy to insert texts e.g. f"Please explain the theory of relativity"
+    context = f"\"{context}\"."
+    generated_text = generate_text(prompt, context, gptmodel)
 
     return jsonify({"generated_text": generated_text})
 
